@@ -76,11 +76,9 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
         continue;
       }
 
-      // Store original parent for later restoration
-      const originalParent = element.parentElement;
       const originalStyle = element.getAttribute('style');
 
-      // Make element visible for capture
+      // Make element temporarily visible for capture
       element.style.position = 'static';
       element.style.visibility = 'visible';
       element.style.display = 'block';
@@ -90,7 +88,6 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
       element.style.height = '1123px';
 
       try {
-        // Capture with html2canvas
         const canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
@@ -118,14 +115,12 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
       }
     }
 
-    // Sanitize filename
     const sanitizedName = studentName ? studentName.trim().replace(/[^a-zA-Z0-9]/g, '_') : 'Nouvelle_Fiche';
     pdf.save(`Fiche_Scolaire_${sanitizedName}.pdf`);
   } catch (error) {
     console.error('PDF Generation Error:', error);
     alert('Erreur lors de la génération du PDF: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
   } finally {
-    // Restore original window.getComputedStyle
     window.getComputedStyle = originalGetComputedStyle;
   }
 }
