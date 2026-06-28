@@ -1,0 +1,6 @@
+{
+  "name": "Fiche de Renseignement Scolaire",
+  "description": "Formulaire d'inscription et fiche d'urgence scolaire avec génération de PDF multi-pages et export CSV.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
