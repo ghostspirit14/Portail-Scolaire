@@ -10,6 +10,9 @@ export interface ParentType {
   courriel: string;
   profession: string;
   codeCSP: string;
+  situationFamille: 'Marié' | 'Séparé' | 'Divorcé' | 'Vie maritale' | 'Remarié' | 'Veuf' | 'Veuve' | 'Célibataire' | '';
+  residenceEnfant: boolean | null;
+  autoriteParentale: boolean | null;
 }
 
 export interface BrotherSisterType {
@@ -24,6 +27,7 @@ export interface PersonneAutoriseeType {
   nomPrenom: string;
   lienParente: string;
   telephone: string;
+  adresseComplete: string;
 }
 
 export interface ContactPrevenirType {
@@ -55,6 +59,8 @@ export interface StudentRecord {
     ecolePrecedente: string;
     villeEcolePrecedente: string;
     redoublant: boolean | null;
+    classePrecedente: string;
+    enseignantPrecedent: string;
   };
 
   // SECTION 2: FAMILLE
@@ -66,16 +72,19 @@ export interface StudentRecord {
 
   // N° SÉCURITÉ SOCIALE
   secuSociale: string;
+  secuSocialeCentre: string;
 
   // SECTION 3: SITUATION MÉDICALE & URGENCE
   medical: {
     allergies: string;
     problemesSante: string;
     paiEnCours: boolean | null;
+    papEnCours: boolean | null;
     medecinNom: string;
     medecinVille: string;
     medecinTel: string;
     hopitalPreference: string;
+    vaccinAntitetaniqueDate: string;
   };
 
   // SECTION 4: LUNETTES
@@ -88,6 +97,7 @@ export interface StudentRecord {
   assurance: {
     compagnie: string;
     numeroContrat: string;
+    adresse: string;
   };
 
   // SECTION 6: AUTORISATION DE COMMUNICATION
@@ -120,9 +130,10 @@ export interface StudentRecord {
     recommandations: string;
     signatureDate: string;
   };
+  signature?: string;
 }
 
-export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY LE PESNEL", schoolYear: string = "2025-2026"): StudentRecord => ({
+export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY LE PESNEL", schoolYear: string = "2026-2027"): StudentRecord => ({
   id: '',
   createdAt: '',
   updatedAt: '',
@@ -142,6 +153,8 @@ export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY
     ecolePrecedente: '',
     villeEcolePrecedente: '',
     redoublant: null,
+    classePrecedente: '',
+    enseignantPrecedent: '',
   },
   famille: {
     parent1: {
@@ -156,6 +169,9 @@ export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY
       courriel: '',
       profession: '',
       codeCSP: '',
+      situationFamille: '',
+      residenceEnfant: null,
+      autoriteParentale: null,
     },
     parent2: {
       lienParente: '',
@@ -169,18 +185,24 @@ export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY
       courriel: '',
       profession: '',
       codeCSP: '',
+      situationFamille: '',
+      residenceEnfant: null,
+      autoriteParentale: null,
     },
     fratrie: [],
   },
   secuSociale: '',
+  secuSocialeCentre: '',
   medical: {
     allergies: '',
     problemesSante: '',
     paiEnCours: null,
+    papEnCours: null,
     medecinNom: '',
     medecinVille: '',
     medecinTel: '',
     hopitalPreference: '',
+    vaccinAntitetaniqueDate: '',
   },
   lunettes: {
     porte: null,
@@ -189,6 +211,7 @@ export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY
   assurance: {
     compagnie: '',
     numeroContrat: '',
+    adresse: '',
   },
   autorisationCom: {
     associationParents: null,
@@ -213,6 +236,7 @@ export const INITIAL_RECORD = (schoolName: string = "ÉCOLE PRIMAIRE DE FONTENAY
     recommandations: '',
     signatureDate: '',
   },
+  signature: '',
 });
 
 export interface CSPCodeType {
@@ -262,3 +286,23 @@ export const CSP_CODES: CSPCodeType[] = [
   { code: '86', label: 'Personnes sans activité professionnelle de 60 ans et plus (sauf retraités)' },
   { code: '99', label: 'Sans profession (sans précision)' },
 ];
+
+export function getPreviousSchoolYear(schoolYear: string): string {
+  if (!schoolYear) return '2025-2026';
+  // Match four digits, optional space, separator, optional space, four digits
+  const match = schoolYear.match(/(\d{4})\s*[-/]\s*(\d{4})/);
+  if (match) {
+    const start = parseInt(match[1], 10);
+    const end = parseInt(match[2], 10);
+    return `${start - 1}-${end - 1}`;
+  }
+  // Also match two digits (like 26-27 or 26 - 27)
+  const shortMatch = schoolYear.match(/(\d{2})\s*[-/]\s*(\d{2})/);
+  if (shortMatch) {
+    const start = parseInt(shortMatch[1], 10);
+    const end = parseInt(shortMatch[2], 10);
+    return `${start - 1}-${end - 1}`;
+  }
+  return '2025-2026';
+}
+

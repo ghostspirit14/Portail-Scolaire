@@ -2,8 +2,10 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export async function generateStudentPDF(studentName: string, includeCSP: boolean): Promise<void> {
+  // Store the original window.getComputedStyle to restore it later
   const originalGetComputedStyle = window.getComputedStyle;
 
+  // Set up offscreen canvas for oklch -> rgba conversion
   const helperCanvas = document.createElement('canvas');
   helperCanvas.width = 1;
   helperCanvas.height = 1;
@@ -13,6 +15,7 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
     if (!value || typeof value !== 'string' || !value.includes('oklch')) {
       return value;
     }
+    // Match oklch(...) patterns
     return value.replace(/oklch\([^)]+\)/g, (match) => {
       if (!ctx) return 'rgba(0,0,0,0)';
       try {
@@ -27,6 +30,7 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
     });
   }
 
+  // Override getComputedStyle with a Proxy during execution
   window.getComputedStyle = function (elt, pseudoElt) {
     if (!elt) {
       return originalGetComputedStyle(elt, pseudoElt);
@@ -43,12 +47,12 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
             return val;
           };
         }
-        const val = Reflect.get(target, prop, receiver);
+        const val = target[prop as any];
         if (typeof val === 'string') {
           return convertOklchToRgba(val);
         }
         if (typeof val === 'function') {
-          return val.bind(target);
+          return (val as any).bind(target);
         }
         return val;
       }
@@ -76,51 +80,29 @@ export async function generateStudentPDF(studentName: string, includeCSP: boolea
         continue;
       }
 
-      const originalStyle = element.getAttribute('style');
+      // Capture the page with html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2, // High resolution for beautiful crisp prints
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
 
-      // Make element temporarily visible for capture
-      element.style.position = 'static';
-      element.style.visibility = 'visible';
-      element.style.display = 'block';
-      element.style.left = 'auto';
-      element.style.top = 'auto';
-      element.style.width = '794px';
-      element.style.height = '1123px';
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-      try {
-        const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          windowHeight: 1123,
-          windowWidth: 794
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-        if (i > 0) {
-          pdf.addPage();
-        }
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      } finally {
-        // Restore original style
-        if (originalStyle) {
-          element.setAttribute('style', originalStyle);
-        } else {
-          element.removeAttribute('style');
-        }
+      if (i > 0) {
+        pdf.addPage();
       }
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     }
 
+    // Sanitize filename
     const sanitizedName = studentName ? studentName.trim().replace(/[^a-zA-Z0-9]/g, '_') : 'Nouvelle_Fiche';
     pdf.save(`Fiche_Scolaire_${sanitizedName}.pdf`);
-  } catch (error) {
-    console.error('PDF Generation Error:', error);
-    alert('Erreur lors de la génération du PDF: ' + (error instanceof Error ? error.message : 'Erreur inconnue'));
   } finally {
+    // Restore original window.getComputedStyle safely
     window.getComputedStyle = originalGetComputedStyle;
   }
 }

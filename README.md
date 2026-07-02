@@ -1,63 +1,20 @@
 <div align="center">
-<h1>Portail Scolaire</h1>
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Portail Scolaire
+# Run and deploy your AI Studio app
 
-Une application d'IA pour la gestion et l'assistance pédagogique.
+This contains everything you need to run your app locally.
 
-## Prise en main
+View your app in AI Studio: https://ai.studio/apps/a9bfa3d5-6dc8-4372-b5d8-1f43a02e810c
 
-### Prérequis
-- Node.js (v16 ou supérieur)
-- npm ou yarn
+## Run Locally
 
-### Installation et exécution
+**Prerequisites:**  Node.js
 
-1. **Installer les dépendances:**
-   ```bash
-   npm install
-   ```
 
-2. **Configurer les variables d'environnement:**
-   - Créez un fichier `.env.local` à la racine du projet
-   - Ajoutez votre clé API Gemini (ou un autre fournisseur d'IA compatible):
-     ```
-     GEMINI_API_KEY=votre_clé_api_ici
-     ```
-
-3. **Lancer l'application en développement:**
-   ```bash
-   npm run dev
-   ```
-
-4. **Accéder à l'application:**
-   Ouvrez votre navigateur et visitez `http://localhost:3000`
-
-## Caractéristiques
-
-- Interface utilisateur intuitive pour l'assistance pédagogique
-- Intégration avec des API d'IA indépendantes
-- Pas de dépendances propriétaires ou de services tiers obligatoires
-
-## Architecture
-
-L'application est construite avec:
-- **Frontend:** Framework JavaScript moderne
-- **Backend:** API compatible avec les services d'IA
-- **Déploiement:** Flexible et indépendant
-
-## Configuration de production
-
-Pour déployer en production:
-- Assurez-vous que `GEMINI_API_KEY` est défini dans votre environnement
-- Lancez `npm run build` pour générer la version optimisée
-- Utilisez `npm start` pour servir l'application
-
-## Contribution
-
-Les contributions sont bienvenues! N'hésitez pas à fork le projet et soumettre des pull requests.
-
-## Licence
-
-À définir selon vos préférences.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

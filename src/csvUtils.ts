@@ -23,6 +23,8 @@ export function flattenRecord(record: StudentRecord): Record<string, string> {
     eleve_ecolePrecedente: record.eleve.ecolePrecedente,
     eleve_villeEcolePrecedente: record.eleve.villeEcolePrecedente,
     eleve_redoublant: record.eleve.redoublant === null ? '' : record.eleve.redoublant ? 'Oui' : 'Non',
+    eleve_classePrecedente: record.eleve.classePrecedente || '',
+    eleve_enseignantPrecedent: record.eleve.enseignantPrecedent || '',
 
     // Parent 1
     parent1_lienParente: record.famille.parent1.lienParente,
@@ -36,6 +38,9 @@ export function flattenRecord(record: StudentRecord): Record<string, string> {
     parent1_courriel: record.famille.parent1.courriel,
     parent1_profession: record.famille.parent1.profession,
     parent1_codeCSP: record.famille.parent1.codeCSP,
+    parent1_situationFamille: record.famille.parent1.situationFamille || '',
+    parent1_residenceEnfant: record.famille.parent1.residenceEnfant === null ? '' : record.famille.parent1.residenceEnfant ? 'Oui' : 'Non',
+    parent1_autoriteParentale: record.famille.parent1.autoriteParentale === null ? '' : record.famille.parent1.autoriteParentale ? 'Oui' : 'Non',
 
     // Parent 2
     parent2_lienParente: record.famille.parent2.lienParente,
@@ -49,21 +54,27 @@ export function flattenRecord(record: StudentRecord): Record<string, string> {
     parent2_courriel: record.famille.parent2.courriel,
     parent2_profession: record.famille.parent2.profession,
     parent2_codeCSP: record.famille.parent2.codeCSP,
+    parent2_situationFamille: record.famille.parent2.situationFamille || '',
+    parent2_residenceEnfant: record.famille.parent2.residenceEnfant === null ? '' : record.famille.parent2.residenceEnfant ? 'Oui' : 'Non',
+    parent2_autoriteParentale: record.famille.parent2.autoriteParentale === null ? '' : record.famille.parent2.autoriteParentale ? 'Oui' : 'Non',
 
     // Fratrie
     fratrie_json: JSON.stringify(record.famille.fratrie),
 
     // Sécurité Sociale
     secuSociale: record.secuSociale,
+    secuSocialeCentre: record.secuSocialeCentre || '',
 
     // Médical
     medical_allergies: record.medical.allergies,
     medical_problemesSante: record.medical.problemesSante,
     medical_paiEnCours: record.medical.paiEnCours === null ? '' : record.medical.paiEnCours ? 'Oui' : 'Non',
+    medical_papEnCours: record.medical.papEnCours === null ? '' : record.medical.papEnCours ? 'Oui' : 'Non',
     medical_medecinNom: record.medical.medecinNom,
     medical_medecinVille: record.medical.medecinVille,
     medical_medecinTel: record.medical.medecinTel,
     medical_hopitalPreference: record.medical.hopitalPreference,
+    medical_vaccinAntitetaniqueDate: record.medical.vaccinAntitetaniqueDate || '',
 
     // Lunettes
     lunettes_porte: record.lunettes.porte === null ? '' : record.lunettes.porte ? 'Oui' : 'Non',
@@ -72,6 +83,7 @@ export function flattenRecord(record: StudentRecord): Record<string, string> {
     // Assurance
     assurance_compagnie: record.assurance.compagnie,
     assurance_numeroContrat: record.assurance.numeroContrat,
+    assurance_adresse: record.assurance.adresse || '',
 
     // Autorisation Com
     autorisationCom_associationParents: record.autorisationCom.associationParents === null ? '' : record.autorisationCom.associationParents ? 'Oui' : 'Non',
@@ -137,6 +149,8 @@ export function inflateRecord(flat: Record<string, string>): StudentRecord {
       ecolePrecedente: flat.eleve_ecolePrecedente || '',
       villeEcolePrecedente: flat.eleve_villeEcolePrecedente || '',
       redoublant: parseBool(flat.eleve_redoublant),
+      classePrecedente: flat.eleve_classePrecedente || '',
+      enseignantPrecedent: flat.eleve_enseignantPrecedent || '',
     },
     
     famille: {
@@ -152,6 +166,9 @@ export function inflateRecord(flat: Record<string, string>): StudentRecord {
         courriel: flat.parent1_courriel || '',
         profession: flat.parent1_profession || '',
         codeCSP: flat.parent1_codeCSP || '',
+        situationFamille: (flat.parent1_situationFamille as any) || '',
+        residenceEnfant: parseBool(flat.parent1_residenceEnfant),
+        autoriteParentale: parseBool(flat.parent1_autoriteParentale),
       },
       parent2: {
         lienParente: (flat.parent2_lienParente as any) || '',
@@ -165,20 +182,26 @@ export function inflateRecord(flat: Record<string, string>): StudentRecord {
         courriel: flat.parent2_courriel || '',
         profession: flat.parent2_profession || '',
         codeCSP: flat.parent2_codeCSP || '',
+        situationFamille: (flat.parent2_situationFamille as any) || '',
+        residenceEnfant: parseBool(flat.parent2_residenceEnfant),
+        autoriteParentale: parseBool(flat.parent2_autoriteParentale),
       },
       fratrie: parseArray(flat.fratrie_json, []),
     },
     
     secuSociale: flat.secuSociale || '',
+    secuSocialeCentre: flat.secuSocialeCentre || '',
     
     medical: {
       allergies: flat.medical_allergies || '',
       problemesSante: flat.medical_problemesSante || '',
       paiEnCours: parseBool(flat.medical_paiEnCours),
+      papEnCours: parseBool(flat.medical_papEnCours),
       medecinNom: flat.medical_medecinNom || '',
       medecinVille: flat.medical_medecinVille || '',
       medecinTel: flat.medical_medecinTel || '',
       hopitalPreference: flat.medical_hopitalPreference || '',
+      vaccinAntitetaniqueDate: flat.medical_vaccinAntitetaniqueDate || '',
     },
     
     lunettes: {
@@ -189,6 +212,7 @@ export function inflateRecord(flat: Record<string, string>): StudentRecord {
     assurance: {
       compagnie: flat.assurance_compagnie || '',
       numeroContrat: flat.assurance_numeroContrat || '',
+      adresse: flat.assurance_adresse || '',
     },
     
     autorisationCom: {

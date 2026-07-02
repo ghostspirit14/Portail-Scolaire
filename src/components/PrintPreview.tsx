@@ -1,5 +1,5 @@
 import React from 'react';
-import { StudentRecord, CSP_CODES } from '../types';
+import { StudentRecord, CSP_CODES, getPreviousSchoolYear } from '../types';
 
 interface PrintPreviewProps {
   record: StudentRecord;
@@ -24,7 +24,7 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
   // Helper to render value or dotted line placeholder
   const renderField = (value: string | null | undefined, placeholderLength: number = 20) => {
     if (value !== undefined && value !== null && value.trim() !== '') {
-      return <span className="font-mono font-medium text-blue-900 border-b border-gray-400 px-1 inline-block">{value}</span>;
+      return <span className="font-mono font-medium text-blue-900 px-1">{value}</span>;
     }
     return <span className="text-gray-400 font-mono">{".".repeat(placeholderLength)}</span>;
   };
@@ -51,47 +51,66 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
             <h1 className="text-xl font-bold uppercase tracking-wider mb-1">Fiche de Renseignement Scolaire</h1>
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold uppercase">
               <div className="text-left">ÉCOLE : <span className="underline">{record.ecoleNom || '...................................................'}</span></div>
-              <div className="text-right">ANNÉE SCOLAIRE : <span className="underline">{record.anneeScolaire || '2025 - 2026'}</span></div>
+              <div className="text-right">ANNÉE SCOLAIRE : <span className="underline">{record.anneeScolaire || '2026 - 2027'}</span></div>
             </div>
           </div>
 
           {/* SECTION 1: ÉLÈVE */}
-          <div className="border-2 border-black p-3 mb-4">
-            <h2 className="text-xs font-bold uppercase bg-black text-white px-2 py-1 mb-3 inline-block">1 - ÉLÈVE</h2>
+          <div className="border-2 border-black p-2 mb-3">
+            <h2 className="text-[11px] font-bold uppercase bg-black text-white px-2 py-0.5 mb-2 inline-block">1 - ÉLÈVE</h2>
             
-            <div className="grid grid-cols-1 gap-2.5 text-xs">
+            <div className="space-y-2 text-[11px]">
+              {/* 1.1 - État Civil */}
               <div>
-                <span className="font-semibold uppercase">Nom de famille (en capitales) :</span> {renderField(record.eleve.nom, 45)}
+                <div className="font-bold underline text-[10px] mb-1 uppercase">1.1 - État Civil de l'Élève</div>
+                <div className="grid grid-cols-1 gap-1 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="font-semibold uppercase">Nom de famille :</span> {renderField(record.eleve.nom, 24)}</div>
+                    <div><span className="font-semibold uppercase">Prénom :</span> {renderField(record.eleve.prenoms, 24)}</div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <div className="flex gap-2 items-center">
+                      <span className="font-semibold uppercase">Sexe :</span>
+                      <span className="flex items-center gap-0.5">{renderCheckbox(record.eleve.sexe === 'M')} M</span>
+                      <span className="flex items-center gap-0.5">{renderCheckbox(record.eleve.sexe === 'F')} F</span>
+                    </div>
+                    <div><span className="font-semibold uppercase">Né(e) le :</span> {renderField(formatDate(record.eleve.dateNaissance), 10)}</div>
+                    <div><span className="font-semibold uppercase">À :</span> {renderField(record.eleve.villeNaissance, 12)}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="font-semibold uppercase">Département de naissance :</span> {renderField(record.eleve.departementNaissance, 12)}</div>
+                    <div><span className="font-semibold uppercase">Nationalité :</span> {renderField(record.eleve.nationalite, 15)}</div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="font-semibold uppercase">Prénoms (souligner le prénom usuel) :</span> {renderField(record.eleve.prenoms, 45)}
+
+              {/* 1.2 - Année scolaire */}
+              <div className="border-t border-gray-300 pt-1.5">
+                <div className="font-bold underline text-[10px] mb-1 uppercase">1.2 - Année Scolaire {getPreviousSchoolYear(record.anneeScolaire)}</div>
+                <div className="grid grid-cols-1 gap-1 text-[11px]">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="font-semibold uppercase">Classe ({getPreviousSchoolYear(record.anneeScolaire)}) :</span> {renderField(record.eleve.classePrecedente, 15)}</div>
+                    <div><span className="font-semibold uppercase">Enseignant(e) ({getPreviousSchoolYear(record.anneeScolaire)}) :</span> {renderField(record.eleve.enseignantPrecedent, 15)}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="font-semibold uppercase">École fréquentée :</span> {renderField(record.eleve.ecolePrecedente, 18)}</div>
+                    <div><span className="font-semibold uppercase">Ville :</span> {renderField(record.eleve.villeEcolePrecedente, 15)}</div>
+                  </div>
+                  <div className="flex gap-6 items-center">
+                    <span className="font-semibold uppercase">L'élève est-il redoublant ? :</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.eleve.redoublant === true)} Oui</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.eleve.redoublant === false)} Non</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-8 items-center">
-                <span className="font-semibold uppercase">Sexe :</span>
-                <span className="flex items-center gap-1">{renderCheckbox(record.eleve.sexe === 'M')} M</span>
-                <span className="flex items-center gap-1">{renderCheckbox(record.eleve.sexe === 'F')} F</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div><span className="font-semibold uppercase">Né(e) le :</span> {renderField(formatDate(record.eleve.dateNaissance), 15)}</div>
-                <div><span className="font-semibold uppercase">À (Ville) :</span> {renderField(record.eleve.villeNaissance, 18)}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div><span className="font-semibold uppercase">Département :</span> {renderField(record.eleve.departementNaissance, 10)}</div>
-                <div><span className="font-semibold uppercase">Pays :</span> {renderField(record.eleve.paysNaissance, 12)}</div>
-                <div><span className="font-semibold uppercase">Nationalité :</span> {renderField(record.eleve.nationalite, 12)}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div><span className="font-semibold uppercase">Classe actuelle :</span> {renderField(record.eleve.classe, 18)}</div>
-                <div><span className="font-semibold uppercase">Enseignant(e) :</span> {renderField(record.eleve.enseignant, 18)}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div><span className="font-semibold uppercase">École fréquentée l'année précédente :</span> {renderField(record.eleve.ecolePrecedente, 18)}</div>
-                <div><span className="font-semibold uppercase">Ville :</span> {renderField(record.eleve.villeEcolePrecedente, 15)}</div>
-              </div>
-              <div className="flex gap-6 items-center">
-                <span className="font-semibold uppercase">L'élève est-il redoublant ? :</span>
-                <span className="flex items-center gap-1">{renderCheckbox(record.eleve.redoublant === true)} Oui</span>
-                <span className="flex items-center gap-1">{renderCheckbox(record.eleve.redoublant === false)} Non</span>
+
+              {/* 1.3 - Scolarité */}
+              <div className="border-t border-gray-300 pt-1.5">
+                <div className="font-bold underline text-[10px] mb-1 uppercase">1.3 - Scolarité {record.anneeScolaire || '2026-2027'}</div>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div><span className="font-semibold uppercase">Classe ({record.anneeScolaire || '2026-2027'}) :</span> {renderField(record.eleve.classe, 18)}</div>
+                  <div><span className="font-semibold uppercase">Enseignant(e) ({record.anneeScolaire || '2026-2027'}) :</span> {renderField(record.eleve.enseignant, 18)}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -122,6 +141,11 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                   <div className="truncate"><span className="font-semibold uppercase">Courriel :</span> {renderField(record.famille.parent1.courriel, 20)}</div>
                   <div><span className="font-semibold uppercase">Profession :</span> {renderField(record.famille.parent1.profession, 15)}</div>
                   <div><span className="font-semibold uppercase">Code C.S.P. (Page 3) :</span> <span className="font-mono bg-gray-100 border px-1.5 py-0.5 rounded font-bold">{record.famille.parent1.codeCSP || '__'}</span></div>
+                  <div><span className="font-semibold uppercase">Situation de famille :</span> {renderField(record.famille.parent1.situationFamille, 15)}</div>
+                  <div className="grid grid-cols-2 gap-1">
+                    <div><span className="font-semibold uppercase">Résid. enfant :</span> {record.famille.parent1.residenceEnfant === true ? 'Oui' : record.famille.parent1.residenceEnfant === false ? 'Non' : '___'}</div>
+                    <div><span className="font-semibold uppercase">Aut. parentale :</span> {record.famille.parent1.autoriteParentale === true ? 'Oui' : record.famille.parent1.autoriteParentale === false ? 'Non' : '___'}</div>
+                  </div>
                 </div>
               </div>
 
@@ -146,6 +170,11 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                   <div className="truncate"><span className="font-semibold uppercase">Courriel :</span> {renderField(record.famille.parent2.courriel, 20)}</div>
                   <div><span className="font-semibold uppercase">Profession :</span> {renderField(record.famille.parent2.profession, 15)}</div>
                   <div><span className="font-semibold uppercase">Code C.S.P. (Page 3) :</span> <span className="font-mono bg-gray-100 border px-1.5 py-0.5 rounded font-bold">{record.famille.parent2.codeCSP || '__'}</span></div>
+                  <div><span className="font-semibold uppercase">Situation de famille :</span> {renderField(record.famille.parent2.situationFamille, 15)}</div>
+                  <div className="grid grid-cols-2 gap-1">
+                    <div><span className="font-semibold uppercase">Résid. enfant :</span> {record.famille.parent2.residenceEnfant === true ? 'Oui' : record.famille.parent2.residenceEnfant === false ? 'Non' : '___'}</div>
+                    <div><span className="font-semibold uppercase">Aut. parentale :</span> {record.famille.parent2.autoriteParentale === true ? 'Oui' : record.famille.parent2.autoriteParentale === false ? 'Non' : '___'}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -227,8 +256,23 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                 <div><span className="font-semibold uppercase">Ville :</span> {renderField(record.medical.medecinVille, 10)}</div>
                 <div><span className="font-semibold uppercase">Tél :</span> {renderField(record.medical.medecinTel, 12)}</div>
               </div>
-              <div>
-                <span className="font-semibold uppercase">Hôpital de préférence en cas d'urgence :</span> {renderField(record.medical.hopitalPreference, 35)}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-semibold uppercase">Hôpital de préférence :</span> {renderField(record.medical.hopitalPreference, 20)}
+                </div>
+                <div>
+                  <span className="font-semibold uppercase">Date dernier rappel vaccin antitétanique :</span> {renderField(record.medical.vaccinAntitetaniqueDate, 15)}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-2 mt-2">
+                <div>
+                  <span className="font-semibold uppercase block text-[9px] text-gray-500">N° et adresse du centre de Sécurité Sociale :</span>
+                  <span className="font-mono text-blue-900 text-xs">{record.secuSocialeCentre || '...................................................'}</span>
+                </div>
+                <div>
+                  <span className="font-semibold uppercase block text-[9px] text-gray-500">N° et adresse de l'assurance scolaire :</span>
+                  <span className="font-mono text-blue-900 text-xs">{record.assurance.adresse || '...................................................'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -254,9 +298,12 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
           <div className="border-2 border-black p-3.5 mb-4 text-xs">
             <h2 className="text-xs font-bold uppercase bg-black text-white px-2 py-1 mb-2.5 inline-block">5 - ASSURANCE SCOLAIRE</h2>
             <p className="text-[10px] text-gray-600 mb-2">L'assurance est obligatoire pour toutes les activités scolaires facultatives (sorties de fin d'année, classes de découvertes, etc.).</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-2">
               <div><span className="font-semibold uppercase">Compagnie :</span> {renderField(record.assurance.compagnie, 25)}</div>
               <div><span className="font-semibold uppercase">N° de contrat :</span> {renderField(record.assurance.numeroContrat, 20)}</div>
+            </div>
+            <div className="border-t pt-1.5 mt-1.5">
+              <span className="font-semibold uppercase">N° et adresse de l'assurance scolaire :</span> {renderField(record.assurance.adresse, 50)}
             </div>
           </div>
 
@@ -305,8 +352,14 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
             <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-200">
               <div className="text-[10px]">Date : {renderField(formatDate(new Date().toISOString().split('T')[0]), 10)}</div>
               <div className="text-[10px] text-center w-1/3">
-                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-4">Signature des parents</span>
-                <div className="h-8 border border-dashed border-gray-300 bg-gray-50 rounded flex items-center justify-center text-gray-400 text-[9px] italic">Signer après impression</div>
+                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-2">Signature des parents</span>
+                <div className="h-10 border border-dashed border-gray-300 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
+                  {record.signature ? (
+                    <img src={record.signature} className="max-h-full max-w-full object-contain" alt="Signature" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="text-gray-400 text-[9px] italic">Signer après impression</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -432,7 +485,7 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
           {/* Top banner */}
           <div className="grid grid-cols-2 gap-4 border border-black p-2.5 mb-4 text-xs font-semibold uppercase">
             <div>Élève : {record.eleve.nom ? `${record.eleve.nom.toUpperCase()} ${record.eleve.prenoms}` : '...................................................'}</div>
-            <div className="text-right">Classe : {record.eleve.classe ? record.eleve.classe : '.....................'}</div>
+            <div className="text-right">Classe ({record.anneeScolaire || '2026-2027'}) : {record.eleve.classe ? record.eleve.classe : '.....................'}</div>
           </div>
 
           {/* SECTION 8 */}
@@ -445,9 +498,10 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
             <table className="w-full border-collapse border border-black text-[11px] mb-4">
               <thead>
                 <tr className="bg-gray-100 text-left">
-                  <th className="border border-black p-2 w-1/3 uppercase font-semibold">Nom et Prénom</th>
-                  <th className="border border-black p-2 w-1/3 uppercase font-semibold">Lien de parenté / Relation</th>
-                  <th className="border border-black p-2 w-1/3 uppercase font-semibold">Téléphone(s)</th>
+                  <th className="border border-black p-2 w-[25%] uppercase font-semibold">Nom et Prénom</th>
+                  <th className="border border-black p-2 w-[20%] uppercase font-semibold">Lien de parenté / Relation</th>
+                  <th className="border border-black p-2 w-[20%] uppercase font-semibold">Téléphone(s)</th>
+                  <th className="border border-black p-2 w-[35%] uppercase font-semibold">Adresse complète</th>
                 </tr>
               </thead>
               <tbody>
@@ -463,6 +517,9 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                       </td>
                       <td className="border border-black p-2 h-7 font-mono text-blue-900">
                         {p ? p.telephone : ''}
+                      </td>
+                      <td className="border border-black p-2 h-7 font-mono text-blue-900">
+                        {p ? p.adresseComplete : ''}
                       </td>
                     </tr>
                   );
@@ -494,8 +551,14 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                 {renderField(formatDate(new Date().toISOString().split('T')[0]), 10)}
               </div>
               <div className="text-center w-1/3">
-                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-4">Signature du Représentant Légal</span>
-                <div className="h-8 border border-dashed border-gray-300 bg-white rounded flex items-center justify-center text-gray-400 text-[8px] italic">Signer après impression</div>
+                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-2">Signature du Représentant Légal</span>
+                <div className="h-10 border border-dashed border-gray-300 bg-white rounded flex items-center justify-center overflow-hidden">
+                  {record.signature ? (
+                    <img src={record.signature} className="max-h-full max-w-full object-contain" alt="Signature" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="text-gray-400 text-[8px] italic">Signer après impression</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -519,7 +582,7 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
             </div>
             <div className="text-right text-[10px] font-bold uppercase">
               <div>ÉCOLE : <span className="underline">{record.ecoleNom || 'DE FONTENAY LE PESNEL'}</span></div>
-              <div>ANNÉE : <span className="underline">{record.anneeScolaire || '2025-2026'}</span></div>
+              <div>ANNÉE : <span className="underline">{record.anneeScolaire || '2026-2027'}</span></div>
             </div>
           </div>
 
@@ -533,8 +596,9 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                 <div><span className="font-semibold uppercase">Prénom :</span> {renderField(record.eleve.prenoms, 15)}</div>
                 <div className="grid grid-cols-2 gap-1">
                   <div><span className="font-semibold uppercase">Né(e) le :</span> {renderField(formatDate(record.eleve.dateNaissance), 10)}</div>
-                  <div><span className="font-semibold uppercase">Classe :</span> {renderField(record.eleve.classe, 8)}</div>
+                  <div><span className="font-semibold uppercase">Classe ({record.anneeScolaire || '2026-2027'}) :</span> {renderField(record.eleve.classe, 8)}</div>
                 </div>
+                <div><span className="font-semibold uppercase">Enseignant(e) ({record.anneeScolaire || '2026-2027'}) :</span> {renderField(record.eleve.enseignant, 15)}</div>
                 <div><span className="font-semibold uppercase">Adresse :</span> {renderField(record.famille.parent1.adresse || record.famille.parent2.adresse, 20)}</div>
               </div>
             </div>
@@ -650,6 +714,48 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
                   {record.ficheUrgence.recommandations || 'Aucune.'}
                 </p>
               </div>
+
+              {/* COMPLEMENTARY MEDICAL INFORMATION REQUIRED FOR EMERGENCY SHEET */}
+              <div className="border-t border-gray-300 pt-2.5 mt-1 grid grid-cols-2 gap-x-4 gap-y-2 text-[10.5px]">
+                <div>
+                  <span className="font-bold uppercase text-[9px] text-gray-500 block">Coordonnées du Médecin Traitant :</span>
+                  <span className="font-mono text-blue-900">
+                    {record.medical.medecinNom ? `Dr. ${record.medical.medecinNom} (${record.medical.medecinVille || ''}) - Tél: ${record.medical.medecinTel || ''}` : '...................................................'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-bold uppercase text-[9px] text-gray-500 block">Dernier rappel de vaccin antitétanique :</span>
+                  <span className="font-mono text-blue-900">
+                    {record.medical.vaccinAntitetaniqueDate || '...................................................'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-bold uppercase text-[9px] text-gray-500 block">Adresse du centre de Sécurité Sociale :</span>
+                  <span className="font-mono text-blue-900">
+                    {record.secuSocialeCentre || '...................................................'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-bold uppercase text-[9px] text-gray-500 block">Adresse de l'Assurance Scolaire :</span>
+                  <span className="font-mono text-blue-900">
+                    {record.assurance.adresse || '...................................................'}
+                  </span>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-1 col-span-2 border-t border-dashed border-gray-200 pt-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold uppercase text-[9.5px]">Présence d'un P.A.I. en cours :</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.medical.paiEnCours === true)} Oui</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.medical.paiEnCours === false)} Non</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold uppercase text-[9.5px]">Existence d'un P.A.P. (Plan d'Accompagnement Personnalisé) :</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.medical.papEnCours === true)} Oui</span>
+                    <span className="flex items-center gap-1">{renderCheckbox(record.medical.papEnCours === false)} Non</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -662,8 +768,14 @@ export const PrintPreview: React.FC<PrintPreviewProps> = ({ record, includeCSP }
             <div className="flex justify-between items-end mt-4">
               <div className="text-[10px]">Date : {renderField(record.ficheUrgence.signatureDate || formatDate(new Date().toISOString().split('T')[0]), 10)}</div>
               <div className="text-center w-1/3">
-                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-3">Signature des parents</span>
-                <div className="h-7 border border-dashed border-gray-300 bg-white rounded flex items-center justify-center text-gray-400 text-[8px] italic">Signer après impression</div>
+                <span className="font-semibold block uppercase text-[8px] text-gray-500 mb-2">Signature des parents</span>
+                <div className="h-10 border border-dashed border-gray-300 bg-white rounded flex items-center justify-center overflow-hidden">
+                  {record.signature ? (
+                    <img src={record.signature} className="max-h-full max-w-full object-contain" alt="Signature" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="text-gray-400 text-[8px] italic">Signer après impression</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
